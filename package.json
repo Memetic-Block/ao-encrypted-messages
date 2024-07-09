@@ -1,14 +1,80 @@
 {
   "name": "ao-encrypted-messages",
   "version": "1.0.0",
-  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/memetic-block/ao-encrypted-messages.git"
+  },
+  "author": {
+    "name": "Memetic Block",
+    "email": "info@memeticblock.com",
+    "website": "https://memeticblock.com"
+  },
+  "license": "AGPL-3.0-or-later",
+  "keywords": [
+    "arweave",
+    "ar",
+    "blockchain",
+    "warp",
+    "contracts",
+    "ao",
+    "messaging",
+    "messages",
+    "encryption"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./lib/cjs/node/index.js",
+  "module": "./lib/esm/node/index.js",
+  "types": "./lib/types/node/index.d.ts",
+  "browser": "./bundles/web.bundle.min.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "lib",
+    "bundles",
+    "LICENSE.md",
+    "README.md",
+    "package.json"
+  ],
+  "exports": {
+    ".": {
+      "import": "./lib/esm/node/index.js",
+      "require": "./lib/cjs/node/index.js",
+      "types": "./lib/types/node/index.d.ts",
+      "browser": "./bundles/web.bundle.min.js"
+    },
+    "./node": {
+      "import": "./lib/esm/node/index.js",
+      "require": "./lib/cjs/node/index.js",
+      "types": "./lib/types/node/index.d.ts"
+    },
+    "./web": {
+      "import": "./bundles/web.bundle.min.js",
+      "require": "./bundles/web.bundle.min.js",
+      "types": "./lib/types/web/index.d.ts",
+      "browser": "./bundles/web.bundle.min.js"
+    }
+  },
   "scripts": {
+    "build:web": "node bundle.mjs",
+    "build:esm": "tsc -p tsconfig.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json && echo \"{\\\"type\\\": \\\"commonjs\\\"}\" > lib/cjs/package.json",
+    "build": "npm run clean && npm run build:web && npm run build:esm && npm run build:cjs",
+    "clean": "rimraf [ lib bundles ]",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "UNLICENSED",
-  "description": "",
   "dependencies": {
     "@permaweb/aoconnect": "^0.0.56"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "esbuild": "^0.19.12",
+    "esbuild-plugin-polyfill-node": "^0.3.0",
+    "rimraf": "^5.0.9",
+    "typescript": "^5.5.3"
   }
 }

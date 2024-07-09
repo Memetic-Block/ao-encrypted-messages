@@ -14,3 +14,23 @@ logs
 .env
 .env.*
 !.env.exam
+
+node_modules
+lib
+bundles
+coverage
+.nyc_output
+dist
+.husky/_
+cache
+
+# IDEs and editors
+.DS_Store
+yarn-error.log
+
+# Build files
+**/*.min.js
+
+# test files
+tests/wallets
+tests/contracts
