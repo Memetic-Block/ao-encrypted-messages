@@ -1,4 +1,13 @@
-local json = require('json')
+local json = require("json")
+
+local function getTableKeys(tab)
+  local keyset = {}
+  for k,v in pairs(tab) do
+    keyset[#keyset + 1] = k
+  end
+  table.sort(keyset)
+  return keyset
+end
 
 EncryptionPublicKey = EncryptionPublicKey or ''
 Messages = Messages or {}
@@ -29,18 +38,40 @@ Handlers.add(
   Handlers.utils.hasMatchingTag("Action", "Send-Encrypted-Message"),
   function(msg)
     local decoded = json.decode(msg.Data)
-    local message = decoded.message
-    local nonce = decoded.nonce
-    local publicKey = decoded.nonce
-    table.insert(Messages, msg.Data)
-    ao.send({ Target = msg.From, Data = 'OK' })
+
+    assert(decoded.message, "Invalid message")
+    assert(decoded.publicKey, "Invalid publicKey")
+    assert(Messages[decoded.nonce] == nil, "Message ID (nonce) already used")
+
+    Messages[decoded.nonce] = msg.Data
+
+    ao.send({ Target = msg.From, Data = decoded.nonce })
   end
 )
 
 Handlers.add(
-  "getEncryptedMessages",
-  Handlers.utils.hasMatchingTag("Action", "Get-Encrypted-Messages"),
+  "listEncryptedMessages",
+  Handlers.utils.hasMatchingTag("Action", "List-Encrypted-Messages"),
   function(msg)
-    ao.send({ Target = msg.From, Data = json.encode(Messages) })
+    ao.send({ Target = msg.From, Data = json.encode(getTableKeys(Messages)) })
+  end
+)
+
+Handlers.add(
+  "removeEncryptedMessages",
+  Handlers.utils.hasMatchingTag("Action", "Remove-Encrypted-Messages"),
+  function(msg)
+    assert(
+      msg.From == ao.env.Process.Owner,
+      "This action is only available to the process Owner"
+    )
+    ao.log('Data = ' .. msg.Data)
+    local keys = json.decode(msg.Data)
+    for k,v in pairs(keys) do
+      ao.log(k.." = "..v)
+      -- table.remove(Messages, v)
+      if Messages[v] then Messages[v] = nil end
+    end
+    ao.send({ Target = msg.From, Data = msg.Data })
   end
 )
