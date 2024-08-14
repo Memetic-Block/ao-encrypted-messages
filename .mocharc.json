@@ -1,0 +1,9 @@
+{
+  "extensions": ["ts"],
+  "node-option": [
+    "experimental-specifier-resolution=node",
+    "import=./register-esm.js",
+    "experimental-wasm-memory64",
+    "trace-warnings"
+  ]
+}

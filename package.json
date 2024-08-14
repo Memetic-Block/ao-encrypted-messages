@@ -64,17 +64,28 @@
     "build:esm": "tsc -p tsconfig.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && echo \"{\\\"type\\\": \\\"commonjs\\\"}\" > lib/cjs/package.json",
     "build": "npm run clean && npm run build:web && npm run build:esm && npm run build:cjs",
+    "build:process": "npm run clean && node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/bundle.ts",
     "clean": "rimraf [ lib bundles ]",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean:process": "rimraf [ dist ]",
+    "test": "mocha -r ts-node/register test/spec/**/*.ts",
+    "test:process": "mocha -r ts-node/register test/spec/pingpong.spec.ts"
   },
   "dependencies": {
-    "@permaweb/aoconnect": "^0.0.56"
+    "@permaweb/aoconnect": "^0.0.56",
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
+    "@permaweb/ao-loader": "^0.0.35",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
     "@types/node": "^20.14.10",
+    "chai": "^5.1.1",
     "esbuild": "^0.19.12",
     "esbuild-plugin-polyfill-node": "^0.3.0",
+    "mocha": "^10.6.0",
     "rimraf": "^5.0.9",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   }
 }
