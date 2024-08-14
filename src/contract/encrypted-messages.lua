@@ -39,8 +39,12 @@ Handlers.add(
   function(msg)
     local decoded = json.decode(msg.Data)
 
-    assert(decoded.message, "Invalid message")
-    assert(decoded.publicKey, "Invalid publicKey")
+    assert(type(decoded.message) == "string", "Invalid message")
+    assert(type(decoded.publicKey) == "string", "Invalid publicKey")
+    assert(
+      type(decoded.recipientPublicKey) == "string",
+      "Invalid recipientPublicKey"
+    )
     assert(Messages[decoded.nonce] == nil, "Message ID (nonce) already used")
 
     Messages[decoded.nonce] = msg.Data
@@ -65,13 +69,20 @@ Handlers.add(
       msg.From == ao.env.Process.Owner,
       "This action is only available to the process Owner"
     )
-    ao.log('Data = ' .. msg.Data)
+
     local keys = json.decode(msg.Data)
-    for k,v in pairs(keys) do
-      ao.log(k.." = "..v)
-      -- table.remove(Messages, v)
+    for _,v in pairs(keys) do
       if Messages[v] then Messages[v] = nil end
     end
+
     ao.send({ Target = msg.From, Data = msg.Data })
+  end
+)
+
+Handlers.add(
+  "getEncryptedMessage",
+  Handlers.utils.hasMatchingTag("Action", "Get-Encrypted-Message"),
+  function(msg)
+    ao.send({ Target = msg.From, Data = Messages[msg.Data] })
   end
 )
