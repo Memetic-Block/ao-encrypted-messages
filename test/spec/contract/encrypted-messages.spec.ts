@@ -9,7 +9,7 @@ import {
   DEFAULT_HANDLE_OPTIONS,
   ALICE_ADDRESS,
   OWNER_ADDRESS
-} from '../util/setup.js'
+} from '../../util/setup.js'
 
 const encryptionKeyPair = nacl.box.keyPair()
 const encryptionPublicKey = naclUtil.encodeBase64(encryptionKeyPair.publicKey)
@@ -93,7 +93,8 @@ describe('EncryptedMessages Process', async () => {
       Data: JSON.stringify({
         message: naclUtil.encodeBase64(encrypted),
         nonce: nonceB64,
-        publicKey: naclUtil.encodeBase64(publicKey)
+        publicKey: naclUtil.encodeBase64(publicKey),
+        recipientPublicKey: encryptionPublicKey
       })
     })
 
@@ -129,7 +130,9 @@ describe('EncryptedMessages Process', async () => {
         publicKey: 'publicKey'
       })
     })
-    expect(noMessageResult.Error).to.be.a('string')
+    expect(noMessageResult.Error)
+      .to.be.a('string')
+      .that.includes('Invalid message')
 
     const noPublicKeyResult = await handle({
       Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
@@ -138,7 +141,9 @@ describe('EncryptedMessages Process', async () => {
         message: 'message'
       })
     })
-    expect(noPublicKeyResult.Error).to.be.a('string')
+    expect(noPublicKeyResult.Error)
+      .to.be.a('string')
+      .that.includes('Invalid publicKey')
   })
 
   it('Should error if encrypted message nonce has been used', async () => {
@@ -197,17 +202,20 @@ describe('EncryptedMessages Process', async () => {
     const encryptedMessageJson = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceB64,
-      publicKey: naclUtil.encodeBase64(publicKey)
+      publicKey: naclUtil.encodeBase64(publicKey),
+      recipientPublicKey: encryptionPublicKey
     })
     const encryptedMessageJsonTwo = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceTwoB64,
-      publicKey: naclUtil.encodeBase64(publicKey)
+      publicKey: naclUtil.encodeBase64(publicKey),
+      recipientPublicKey: encryptionPublicKey
     })
     const encryptedMessageJsonThree = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceThreeB64,
-      publicKey: naclUtil.encodeBase64(publicKey)
+      publicKey: naclUtil.encodeBase64(publicKey),
+      recipientPublicKey: encryptionPublicKey
     })
     await handle({
       Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
@@ -247,7 +255,8 @@ describe('EncryptedMessages Process', async () => {
       Data: JSON.stringify({
         nonce: nonceOne,
         message: 'message',
-        publicKey: 'publicKey'
+        publicKey: 'publicKey',
+        recipientPublicKey: encryptionPublicKey
       })
     })
     await handle({
@@ -255,7 +264,8 @@ describe('EncryptedMessages Process', async () => {
       Data: JSON.stringify({
         nonce: nonceTwo,
         message: 'message',
-        publicKey: 'publicKey'
+        publicKey: 'publicKey',
+        recipientPublicKey: encryptionPublicKey
       })
     })
     await handle({
@@ -263,7 +273,8 @@ describe('EncryptedMessages Process', async () => {
       Data: JSON.stringify({
         nonce: nonceThree,
         message: 'message',
-        publicKey: 'publicKey'
+        publicKey: 'publicKey',
+        recipientPublicKey: encryptionPublicKey
       })
     })
     await handle({
@@ -271,7 +282,8 @@ describe('EncryptedMessages Process', async () => {
       Data: JSON.stringify({
         nonce: nonceFour,
         message: 'message',
-        publicKey: 'publicKey'
+        publicKey: 'publicKey',
+        recipientPublicKey: encryptionPublicKey
       })
     })
 
@@ -305,5 +317,59 @@ describe('EncryptedMessages Process', async () => {
     expect(result.Error)
       .to.be.a('string')
       .that.includes('This action is only available to the process Owner')
+  })
+
+  it('Should require the recipient public key with messages', async () => {
+    await handle({
+      From: OWNER_ADDRESS,
+      Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
+      Data: encryptionPublicKey
+    })
+
+    const result = await handle({
+      Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
+      Data: JSON.stringify({
+        message: 'message',
+        nonce: 'nonce',
+        publicKey: 'publicKey'
+      })
+    })
+
+    expect(result.Error)
+      .to.be.a('string')
+      .that.includes('Invalid recipientPublicKey')
+  })
+
+  it('Allows fetching an encrypted message by id (nonce)', async () => {
+    await handle({
+      From: OWNER_ADDRESS,
+      Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
+      Data: encryptionPublicKey
+    })
+
+    const nonces = ['one', 'two', 'three', 'four']
+    for (const nonce of nonces) {
+      await handle({
+        Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
+        Data: JSON.stringify({
+          message: 'message',
+          nonce,
+          publicKey: 'publicKey',
+          recipientPublicKey: encryptionPublicKey
+        })
+      })
+    }
+
+    const result = await handle({
+      Tags: [{ name: 'Action', value: 'Get-Encrypted-Message' }],
+      Data: nonces[2]
+    })
+
+    expect(result.Messages[0].Data).to.equal(JSON.stringify({
+      message: 'message',
+      nonce: 'three',
+      publicKey: 'publicKey',
+      recipientPublicKey: encryptionPublicKey
+    }))
   })
 })
