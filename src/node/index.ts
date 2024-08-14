@@ -1,1 +1,1 @@
-export * from '../common/encrypted-messages.js'
+export * from '../common/encrypted-messages'

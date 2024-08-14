@@ -9,7 +9,7 @@ import {
   DEFAULT_HANDLE_OPTIONS,
   ALICE_ADDRESS,
   OWNER_ADDRESS
-} from '../../util/setup.js'
+} from '../../util/setup'
 
 const encryptionKeyPair = nacl.box.keyPair()
 const encryptionPublicKey = naclUtil.encodeBase64(encryptionKeyPair.publicKey)
