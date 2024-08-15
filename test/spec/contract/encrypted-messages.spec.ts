@@ -38,7 +38,10 @@ describe('EncryptedMessages Process', async () => {
   it('Should allow Owner to set encryptionPublicKey', async () => {
     const result = await handle({
       From: OWNER_ADDRESS,
-      Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
+      Tags: [
+        { name: 'Action', value: 'Set-Encryption-Public-Key' },
+        { name: 'EncryptionPublicKey', value: encryptionPublicKey }
+      ],
       Data: encryptionPublicKey
     })
 
@@ -60,7 +63,10 @@ describe('EncryptedMessages Process', async () => {
   it('Should allow anyone to read encryptionPublicKey', async () => {
     await handle({
       From: OWNER_ADDRESS,
-      Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
+      Tags: [
+        { name: 'Action', value: 'Set-Encryption-Public-Key' },
+        { name: 'EncryptionPublicKey', value: encryptionPublicKey }
+      ],
       Data: encryptionPublicKey
     })
 
@@ -343,7 +349,10 @@ describe('EncryptedMessages Process', async () => {
   it('Allows fetching an encrypted message by id (nonce)', async () => {
     await handle({
       From: OWNER_ADDRESS,
-      Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
+      Tags: [
+        { name: 'Action', value: 'Set-Encryption-Public-Key' },
+        { name: 'EncryptionPublicKey', value: encryptionPublicKey }
+      ],
       Data: encryptionPublicKey
     })
 
@@ -361,7 +370,10 @@ describe('EncryptedMessages Process', async () => {
     }
 
     const result = await handle({
-      Tags: [{ name: 'Action', value: 'Get-Encrypted-Message' }],
+      Tags: [
+        { name: 'Action', value: 'Get-Encrypted-Message' },
+        { name: 'EncryptedMessageId', value: nonces[2] }
+      ],
       Data: nonces[2]
     })
 
