@@ -20,7 +20,7 @@ Handlers.add(
       msg.From == ao.env.Process.Owner,
       "This action is only available to the process Owner"
     )
-    EncryptionPublicKey = msg.Data
+    EncryptionPublicKey = msg.Tags.EncryptionPublicKey
     ao.send({ Target = msg.From, Data = EncryptionPublicKey })
   end
 )
@@ -83,6 +83,6 @@ Handlers.add(
   "getEncryptedMessage",
   Handlers.utils.hasMatchingTag("Action", "Get-Encrypted-Message"),
   function(msg)
-    ao.send({ Target = msg.From, Data = Messages[msg.Data] })
+    ao.send({ Target = msg.From, Data = Messages[msg.Tags.EncryptedMessageId] })
   end
 )
