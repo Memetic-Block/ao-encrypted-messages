@@ -34,3 +34,6 @@ yarn-error.log
 # test files
 tests/wallets
 tests/contracts
+
+src/contract/process.wasm
+key.json

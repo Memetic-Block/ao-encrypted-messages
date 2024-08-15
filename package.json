@@ -67,6 +67,9 @@
     "build:process": "npm run clean && node --no-warnings=ExperimentalWarning --loader ts-node/esm scripts/bundle.ts",
     "clean": "rimraf [ lib bundles ]",
     "clean:process": "rimraf [ dist ]",
+    "install-ao-dev-cli": "curl -L https://install_ao.g8way.io | bash",
+    "module:build": "cd src/contract && ao build",
+    "module:publish": "ao publish src/contract/process.wasm -w key.json -b https://up.arweave.net --tag=\"Memory-Limit\" --value=\"1-gb\" --tag=\"Compute-Limit\" --value=\"9000000000000\"",
     "test": "mocha -r ts-node/register test/spec/**/*.ts",
     "test:process": "mocha -r ts-node/register test/spec/pingpong.spec.ts"
   },
@@ -86,6 +89,7 @@
     "mocha": "^10.6.0",
     "rimraf": "^5.0.9",
     "ts-node": "^10.9.2",
+    "tsx": "^4.17.0",
     "typescript": "^5.5.3"
   }
 }
