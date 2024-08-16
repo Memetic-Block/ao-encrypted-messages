@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.esm.json",
   "lib": ["esnext", "dom"],
   "include": ["src/web", "src/common", "src/utils"],
   "compilerOptions": {
