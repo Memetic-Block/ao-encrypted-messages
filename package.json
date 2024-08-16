@@ -25,48 +25,30 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./lib/cjs/node/index.js",
-  "module": "./lib/esm/node/index.js",
-  "types": "./lib/types/node/index.d.ts",
-  "browser": "./bundles/web.bundle.min.js",
-  "type": "module",
   "engines": {
     "node": ">=18"
   },
   "files": [
-    "lib",
-    "bundles",
+    "bundles/**",
+    "dist/**",
+    "lib/**",
     "LICENSE.md",
-    "README.md",
-    "package.json"
+    "README.md"
   ],
-  "exports": {
-    ".": {
-      "import": "./lib/esm/node/index.js",
-      "require": "./lib/cjs/node/index.js",
-      "types": "./lib/types/node/index.d.ts",
-      "browser": "./bundles/web.bundle.min.js"
-    },
-    "./node": {
-      "import": "./lib/esm/node/index.js",
-      "require": "./lib/cjs/node/index.js",
-      "types": "./lib/types/node/index.d.ts"
-    },
-    "./web": {
-      "import": "./bundles/web.bundle.min.js",
-      "require": "./bundles/web.bundle.min.js",
-      "types": "./lib/types/web/index.d.ts",
-      "browser": "./bundles/web.bundle.min.js"
-    }
-  },
+  "main": "./lib/node/index.js",
+  "types": "./lib/node/index.d.ts",
+  "browser": "./bundles/web.bundle.min.js",
   "scripts": {
     "build:web": "node bundle.mjs",
-    "build:esm": "tsc -p tsconfig.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && echo \"{\\\"type\\\": \\\"commonjs\\\"}\" > lib/cjs/package.json",
-    "build": "npm run clean && npm run build:web && npm run build:esm && npm run build:cjs",
+    "build": "npm run clean && npm run build:web && npm run build:esm",
     "build:process": "npm run clean && tsx scripts/bundle.ts",
     "clean": "rimraf [ lib bundles ]",
     "clean:process": "rimraf [ dist ]",
+    "install-ao-dev-cli": "curl -L https://install_ao.g8way.io | bash",
+    "module:build": "cd src/contract && ao build",
+    "module:publish": "ao publish src/contract/process.wasm -w key.json -b https://up.arweave.net --tag=\"Memory-Limit\" --value=\"1-gb\" --tag=\"Compute-Limit\" --value=\"9000000000000\"",
     "test": "mocha test/spec/**/*.ts"
   },
   "dependencies": {

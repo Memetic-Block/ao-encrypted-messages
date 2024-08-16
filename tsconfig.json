@@ -1,47 +1,29 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "ES6",
+    "module": "CommonJS",
     "moduleResolution": "node",
     "lib": [
       "esnext",
       "esnext.asynciterable",
       "dom"
     ],
-    /* "target": "esnext",
-    // "module": "nodenext",
-    // "moduleResolution": "nodenext",
-    // "lib": ["esnext"], */
     "allowSyntheticDefaultImports": true,
-    "outDir": "./lib/esm",
     "listEmittedFiles": false,
     "listFiles": false,
-    
-    // "alwaysStrict": true,
     "types": [
       "node",
       "@types/mocha",
       "@types/chai"
-      /* "jest" */
     ],
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "declarationDir": "./lib/types",
-    /* Additional Checks */
     "pretty": true,
-    // "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "skipLibCheck": true,
-    // "strictNullChecks": true
+    "noFallthroughCasesInSwitch": true
   },
-  "exclude": ["lib", "node_modules", "bundles"],
-  // "ts-node": {
-  //   "compilerOptions": {
-  //     "module": "CommonJS"
-  //   }
-  // }
+  "exclude": ["lib", "node_modules", "bundles"]
 }
