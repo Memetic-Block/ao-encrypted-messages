@@ -30,7 +30,7 @@ export const AO_ENV = {
 const AOS_WASM = fs.readFileSync(
   path.join(
     path.resolve(),
-    './test/util/aos-cbn0KKrBZH7hdNkNokuXLtGryrWM--PjSTBqIzw9Kkk.wasm'
+    './test/util/process.wasm'
   )
 )
 
@@ -40,6 +40,7 @@ export const DEFAULT_HANDLE_OPTIONS = {
   // NB: Important to set the address so that that `Authority` check passes.
   //     Else the `isTrusted` with throw an error.
   Owner: OWNER_ADDRESS,
+  From: OWNER_ADDRESS,
   Module: MODULE_NAME,
   Target: DEFAULT_TARGET,
   Timestamp: Date.now()
@@ -61,11 +62,11 @@ export async function createLoader() {
   })
 
   const programs = [
-    {
-      action: 'Eval',
-      args: [{ name: 'Module', value: DEFAULT_MODULE_ID }],
-      Data: BUNDLED_SOURCE
-    }
+    // {
+    //   action: 'Eval',
+    //   args: [{ name: 'Module', value: DEFAULT_MODULE_ID }],
+    //   Data: BUNDLED_SOURCE
+    // }
   ]
   let memory = null
   for (const { action, args, Data } of programs) {

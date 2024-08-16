@@ -22,7 +22,7 @@ export type EncryptedMessagesSpawnOptions = {
 }
 
 export class EncryptedMessages {
-  static MODULE_ID = 'wrfmfWaeUZO-B0eWMJP5jsW7D74M8l5inkt3c2xm2GI'
+  static MODULE_ID = '8FXv6-VAWicaMleGqA3bURnGMZ5vo_2HvdxXn9ksUBo'
   static SCHEDULER = '_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA'
 
   static async spawn(
@@ -35,11 +35,13 @@ export class EncryptedMessages {
       scheduler: opts?.scheduler || EncryptedMessages.SCHEDULER,
       signer: createDataItemSigner(wallet),
       tags: [
-        ...opts?.tags,
+        ...(opts?.tags || []),
       {name: 'EncryptionPublicKey', value: encryptionPublicKey}
       ]
     })
 
+    // add eval of the bundled lua code here
+//https://github.com/ar-io/ar-io-sdk/blob/18e8f816f1b2b3aaa9407942b085c511bb4dccaa/src/utils/ao.ts#L36
     return new EncryptedMessages(processId, wallet)
   }
 

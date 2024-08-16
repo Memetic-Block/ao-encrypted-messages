@@ -50,11 +50,12 @@ describe('EncryptedMessages Process', async () => {
 
   it('Should prevent non-owners from setting encryptionPublicKey', async () => {
     const result = await handle({
+      Owner: ALICE_ADDRESS,
       From: ALICE_ADDRESS,
       Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
       Data: 'non-owner-public-key'
     })
-
+    console.dir(result, {depth: null})
     expect(result.Error)
       .to.be.a('string')
       .that.includes('This action is only available to the process Owner')
