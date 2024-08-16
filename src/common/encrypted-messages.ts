@@ -27,13 +27,17 @@ export class EncryptedMessages {
 
   static async spawn(
     wallet: JWKInterface,
+    encryptionPublicKey: string,
     opts?: EncryptedMessagesSpawnOptions
   ): Promise<EncryptedMessages> {
     const processId = await aoSpawn({
       module: opts?.module || EncryptedMessages.MODULE_ID,
       scheduler: opts?.scheduler || EncryptedMessages.SCHEDULER,
       signer: createDataItemSigner(wallet),
-      tags: opts?.tags
+      tags: [
+        ...opts?.tags,
+      {name: 'EncryptionPublicKey', value: encryptionPublicKey}
+      ]
     })
 
     return new EncryptedMessages(processId, wallet)
