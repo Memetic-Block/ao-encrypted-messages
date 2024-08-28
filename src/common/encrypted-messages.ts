@@ -8,7 +8,13 @@ import nacl from 'tweetnacl'
 import naclUtil from 'tweetnacl-util'
 import Arweave from 'arweave'
 
-import { WalletNotSetError } from '../errors/wallet-not-set.error'
+import {
+  EncryptedMessageNotFoundError,
+  EncryptedMessagesLuaProcessError,
+  EncryptionPublicKeyNotSetError,
+  MessageIdRequiredError,
+  WalletNotSetError
+} from '../errors'
 import { JWKInterface } from '../util/jwk-interface'
 
 export type SpawnEncryptedMessagesOptions = {
@@ -32,10 +38,17 @@ export type SendEncryptedMessageOptions = {
   secretKey?: string | Uint8Array
 }
 
+export type EncryptedMessage = {
+  message: string
+  nonce: string
+  publicKey: string
+  recipientPublicKey: string
+}
+
 export class EncryptedMessages {
   static SCHEDULER_ID = '_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA'
   static AOS_MODULE_ID = 'cbn0KKrBZH7hdNkNokuXLtGryrWM--PjSTBqIzw9Kkk'
-  static PUBLISHED_LUA_TX_ID = 'X2QMoNMjJGQ2WMKbqJzJ5o8i5lhdJ9wydatJwHVk4vQ'
+  static PUBLISHED_LUA_TX_ID = 'p5zkcW3sysfkGrkN9oc_DfVNQ9PkI3hsb-8CyPeZZdg'
 
   static async spawn(
     wallet: JWKInterface,
@@ -145,11 +158,21 @@ export class EncryptedMessages {
   }
 
   public lastSeenEncryptionPublicKey?: string
+  private arweave: Arweave
 
   constructor(
     public readonly processId: string,
-    private wallet?: JWKInterface
-  ) {}
+    private wallet?: JWKInterface,
+    arweave?: Arweave
+  ) {
+    if (!arweave) {
+      this.arweave = Arweave.init({
+        host: 'arweave.net',
+        port: 443,
+        protocol: 'https'
+      })
+    }
+  }
 
   setWallet(wallet: JWKInterface) {
     this.wallet = wallet
@@ -239,6 +262,10 @@ export class EncryptedMessages {
       await this.getEncryptionPublicKey()
     }
 
+    if (!this.lastSeenEncryptionPublicKey) {
+      throw new EncryptionPublicKeyNotSetError()
+    }
+
     const encryptedMessage = nacl.box(
       naclUtil.decodeUTF8(message),
       nonce,
@@ -265,11 +292,59 @@ export class EncryptedMessages {
     })
 
     if (result.Error) {
-      throw new Error(
-        `Error from EncryptedMessages LUA process: ${result.Error}`
-      )
+      throw new EncryptedMessagesLuaProcessError(result.Error)
     }
 
     return { messageId, nonce: nonceB64 }
+  }
+
+  async listEncryptedMessages(
+    tags?: { name: string, value: string }[]
+  ) {
+    if (!this.wallet) {
+      throw new WalletNotSetError()
+    }
+
+    const { messageId, result } = await EncryptedMessages.sendAosMessage({
+      processId: this.processId,
+      signer: createDataItemSigner(this.wallet),
+      tags: [
+        { name: 'Action', value: 'List-Encrypted-Messages' },
+        ...(tags || [])
+      ]
+    })
+
+    const nonces = JSON.parse(result.Messages[0].Data as string)
+    
+    return { messageId, nonces }
+  }
+
+  async getEncryptedMessage(messageId: string, secretKey?: string) {
+    if (!messageId) {
+      throw new MessageIdRequiredError()
+    }
+
+    const {
+      data: encryptedMessage
+    } = await this.arweave.api.get<EncryptedMessage>(`/${messageId}`)
+
+    if (!encryptedMessage) {
+      throw new EncryptedMessageNotFoundError(messageId)
+    }
+
+    if (secretKey) {
+      const decryptedMessage = nacl.box.open(
+        naclUtil.decodeBase64(encryptedMessage.message),
+        naclUtil.decodeBase64(encryptedMessage.nonce),
+        naclUtil.decodeBase64(encryptedMessage.publicKey),
+        naclUtil.decodeBase64(secretKey)
+      )
+
+      if (decryptedMessage) {
+        encryptedMessage.message = Buffer.from(decryptedMessage).toString()
+      }
+    }
+
+    return encryptedMessage
   }
 }

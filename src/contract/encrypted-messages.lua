@@ -1,14 +1,5 @@
 local json = require("json")
 
-local function getTableKeys(tab)
-  local keyset = {}
-  for k,v in pairs(tab) do
-    keyset[#keyset + 1] = k
-  end
-  table.sort(keyset)
-  return keyset
-end
-
 EncryptionPublicKey = EncryptionPublicKey or ''
 Messages = Messages or {}
 
@@ -47,9 +38,17 @@ Handlers.add(
     )
     assert(Messages[decoded.nonce] == nil, "Message ID (nonce) already used")
 
-    Messages[decoded.nonce] = decoded.nonce
+    Messages[decoded.nonce] = msg.Id
 
     ao.send({ Target = msg.From, Data = decoded.nonce })
+    ao.send({
+      Target = ao.env.Process.Owner,
+      Data = json.encode({
+        nonce = decoded.nonce,
+        messageId = msg.Id,
+        from = msg.From
+      })
+    })
   end
 )
 
@@ -57,7 +56,7 @@ Handlers.add(
   "listEncryptedMessages",
   Handlers.utils.hasMatchingTag("Action", "List-Encrypted-Messages"),
   function(msg)
-    ao.send({ Target = msg.From, Data = json.encode(getTableKeys(Messages)) })
+    ao.send({ Target = msg.From, Data = json.encode(Messages) })
   end
 )
 

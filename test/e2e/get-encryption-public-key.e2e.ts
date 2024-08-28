@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 
 import { EncryptedMessages } from '../..'
 
-const processId = '_pcYbst1UY1ZD2A2b3amMcvWs4iW7-_GCXV8txc9fyw'
+const processId = '5TW6sze3xuYWBDHKmP19fAdgQhebuNZ0nV0NilOpX2Y'
 const wallet = JSON.parse(readFileSync('./key.json').toString())
 const encryptedMessages = new EncryptedMessages(processId, wallet)
 

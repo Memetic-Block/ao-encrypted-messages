@@ -44,7 +44,7 @@
     "build:cjs": "tsc -p tsconfig.cjs.json && echo \"{\\\"type\\\": \\\"commonjs\\\"}\" > lib/cjs/package.json",
     "build": "npm run clean && npm run build:web && npm run build:esm",
     "clean": "rimraf [ lib bundles ]",
-    "process:build": "npm run clean && tsx scripts/bundle.ts",
+    "process:build": "npm run process:clean && tsx scripts/bundle.ts",
     "process:clean": "rimraf [ dist ]",
     "process:publish": "npm run process:build && tsx scripts/publish-process.ts",
     "module:build": "cd src/contract && ao build",
