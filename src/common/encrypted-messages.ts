@@ -4,7 +4,6 @@ import {
   result as aoResult,
   spawn as aoSpawn
 } from '@permaweb/aoconnect'
-import { MessageResult } from '@permaweb/aoconnect/dist/lib/result'
 import nacl from 'tweetnacl'
 import naclUtil from 'tweetnacl-util'
 import Arweave from 'arweave'
@@ -12,7 +11,7 @@ import Arweave from 'arweave'
 import { WalletNotSetError } from '../errors/wallet-not-set.error'
 import { JWKInterface } from '../util/jwk-interface'
 
-export type EncryptedMessagesSpawnOptions = {
+export type SpawnEncryptedMessagesOptions = {
   module?: string
   scheduler?: string
   tags?: { name: string, value: string }[]
@@ -28,6 +27,11 @@ export type SendAosMessageOptions = {
   signer: ReturnType<typeof createDataItemSigner>
 }
 
+export type SendEncryptedMessageOptions = {
+  nonce?: string | Uint8Array
+  secretKey?: string | Uint8Array
+}
+
 export class EncryptedMessages {
   static SCHEDULER_ID = '_GQ33BkPtZrqxA84vM8Zk-N2aO0toNNu_C-l-rawrBA'
   static AOS_MODULE_ID = 'cbn0KKrBZH7hdNkNokuXLtGryrWM--PjSTBqIzw9Kkk'
@@ -35,7 +39,7 @@ export class EncryptedMessages {
 
   static async spawn(
     wallet: JWKInterface,
-    opts?: EncryptedMessagesSpawnOptions
+    opts?: SpawnEncryptedMessagesOptions
   ): Promise<EncryptedMessages> {
     const arweave = Arweave.init({
       host: opts?.arweave?.host || 'arweave.net',
@@ -140,6 +144,8 @@ export class EncryptedMessages {
     throw lastError
   }
 
+  public lastSeenEncryptionPublicKey?: string
+
   constructor(
     public readonly processId: string,
     private wallet?: JWKInterface
@@ -165,7 +171,11 @@ export class EncryptedMessages {
       ]
     })
 
-    return { messageId, result, publicKey: result.Messages[0].Data }
+    const publicKey = result.Messages[0].Data
+
+    this.lastSeenEncryptionPublicKey = publicKey
+
+    return { messageId, result, publicKey }
   }
 
   async setEncryptionPublicKey(
@@ -199,6 +209,67 @@ export class EncryptedMessages {
       ]
     })
 
+    this.lastSeenEncryptionPublicKey = publicKey
+
     return { publicKey, secretKey, messageId }
+  }
+
+  async sendEncryptedMessage(
+    message: string,
+    opts?: SendEncryptedMessageOptions,
+    tags?: { name: string, value: string }[]
+  ) {
+    if (!this.wallet) {
+      throw new WalletNotSetError()
+    }
+
+    const { publicKey, secretKey } = opts?.secretKey
+      ? nacl.box.keyPair.fromSecretKey(
+        typeof opts?.secretKey === 'string'
+          ? Buffer.from(opts?.secretKey)
+          : opts?.secretKey
+      )
+      : nacl.box.keyPair()
+
+    const nonce = typeof opts?.nonce === 'string'
+      ? Buffer.from(opts?.nonce)
+      : nacl.randomBytes(nacl.box.nonceLength)
+
+    if (!this.lastSeenEncryptionPublicKey) {
+      await this.getEncryptionPublicKey()
+    }
+
+    const encryptedMessage = nacl.box(
+      naclUtil.decodeUTF8(message),
+      nonce,
+      naclUtil.decodeBase64(this.lastSeenEncryptionPublicKey),
+      secretKey
+    )
+    const nonceB64 = naclUtil.encodeBase64(nonce)
+    const encryptedMessageJson = JSON.stringify({
+      message: naclUtil.encodeBase64(encryptedMessage),
+      nonce: nonceB64,
+      publicKey: naclUtil.encodeBase64(publicKey),
+      recipientPublicKey: this.lastSeenEncryptionPublicKey
+    })
+
+    const { messageId, result } = await EncryptedMessages.sendAosMessage({
+      processId: this.processId,
+      signer: createDataItemSigner(this.wallet),
+      tags: [
+        { name: 'Action', value: 'Send-Encrypted-Message' },
+        { name: 'Encrypted-Message-Nonce', value: nonceB64 },
+        ...(tags || [])
+      ],
+      data: encryptedMessageJson
+    })
+
+    if (result.Error) {
+      throw new Error(
+        `Error from EncryptedMessages LUA process: ${result.Error}`
+      )
+    }
+
+    return { messageId, nonce: nonceB64 }
   }
 }
