@@ -11,11 +11,14 @@ const encryptedMessages = new EncryptedMessages(processId, wallet)
     `Listing encrypted messages from EncryptedMessages process ${processId}`
   )
 
-  const { messageId, nonces } = await encryptedMessages.listEncryptedMessages()
+  const {
+    messageId,
+    messages
+  } = await encryptedMessages.listEncryptedMessages()
 
   console.log(
-    `Got ${Object.keys(nonces).length} encrypted message nonces`
+    `Got ${Object.keys(messages).length} encrypted messages`
       + ` with message ${messageId}`
   )
-  console.log(nonces)
+  console.log(messages)
 })().catch(console.error)

@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.esm.json",
   "lib": ["esnext", "dom"],
-  "include": ["src/web", "src/common", "src/utils"],
+  "include": ["src/web", "src/common", "src/util", "src/errors"],
   "compilerOptions": {
     "outDir": "./lib/web",
     "moduleResolution": "bundler",

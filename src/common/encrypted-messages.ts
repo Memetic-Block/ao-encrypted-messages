@@ -314,9 +314,11 @@ export class EncryptedMessages {
       ]
     })
 
-    const nonces = JSON.parse(result.Messages[0].Data as string)
+    const messages = JSON.parse(
+      result.Messages[0].Data as string
+    ) as { [nonce: string]: string }
     
-    return { messageId, nonces }
+    return { messageId, messages }
   }
 
   async getEncryptedMessage(messageId: string, secretKey?: string) {
