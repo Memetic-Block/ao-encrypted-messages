@@ -5,10 +5,11 @@ import AoLoader from '@permaweb/ao-loader'
 export const MODULE_NAME = 'Encrypted-Messages'
 export const OWNER_ADDRESS = ''.padEnd(43, '1')
 export const ALICE_ADDRESS = ''.padEnd(42, 'a')
-export const PROCESS_ID = ''.padEnd(43, '1')
-export const MODULE_ID = ''.padEnd(43, '1')
-export const DEFAULT_MODULE_ID = ''.padEnd(43, '1')
-export const DEFAULT_TARGET = ''.padEnd(43, '1')
+export const PROCESS_ID = ''.padEnd(43, '2')
+export const MODULE_ID = ''.padEnd(43, '3')
+export const DEFAULT_MODULE_ID = ''.padEnd(43, '4')
+export const DEFAULT_TARGET = ''.padEnd(43, '5')
+export const DEFAULT_MESSAGE_ID = ''.padEnd(43, 'f')
 
 export const AO_ENV = {
   Process: {
@@ -35,7 +36,7 @@ const AOS_WASM = fs.readFileSync(
 )
 
 export const DEFAULT_HANDLE_OPTIONS = {
-  Id: DEFAULT_MODULE_ID,
+  Id: DEFAULT_MESSAGE_ID,
   ['Block-Height']: '1',
   // NB: Important to set the address so that that `Authority` check passes.
   //     Else the `isTrusted` with throw an error.

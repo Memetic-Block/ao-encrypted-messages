@@ -8,17 +8,14 @@ const encryptedMessages = new EncryptedMessages(processId, wallet)
 
 ;(async () => {
   console.log(
-    `Setting encryption public key on EncryptedMessages process ${processId}`
+    `Listing encrypted messages from EncryptedMessages process ${processId}`
   )
 
-  const {
-    publicKey,
-    secretKey,
-    messageId
-  } = await encryptedMessages.setEncryptionPublicKey()
+  const { messageId, nonces } = await encryptedMessages.listEncryptedMessages()
 
   console.log(
-    `Set encryption public key ${publicKey} with secret key ${secretKey}`
+    `Got ${Object.keys(nonces).length} encrypted message nonces`
       + ` with message ${messageId}`
   )
+  console.log(nonces)
 })().catch(console.error)

@@ -205,18 +205,21 @@ describe('EncryptedMessages Process', async () => {
       naclUtil.decodeBase64(encryptionPublicKey),
       secretKey
     )
+    const encryptedMessageId = ''.padEnd(43, '1')
     const encryptedMessageJson = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceB64,
       publicKey: naclUtil.encodeBase64(publicKey),
       recipientPublicKey: encryptionPublicKey
     })
+    const encryptedMessageIdTwo = ''.padEnd(43, '2')
     const encryptedMessageJsonTwo = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceTwoB64,
       publicKey: naclUtil.encodeBase64(publicKey),
       recipientPublicKey: encryptionPublicKey
     })
+    const encryptedMessageIdThree = ''.padEnd(43, '3')
     const encryptedMessageJsonThree = JSON.stringify({
       message: naclUtil.encodeBase64(encrypted),
       nonce: nonceThreeB64,
@@ -225,15 +228,18 @@ describe('EncryptedMessages Process', async () => {
     })
     await handle({
       Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
-      Data: encryptedMessageJson
+      Data: encryptedMessageJson,
+      Id: encryptedMessageId
     })
     await handle({
       Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
-      Data: encryptedMessageJsonTwo
+      Data: encryptedMessageJsonTwo,
+      Id: encryptedMessageIdTwo
     })
     await handle({
       Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
-      Data: encryptedMessageJsonThree
+      Data: encryptedMessageJsonThree,
+      Id: encryptedMessageIdThree
     })
 
     const result = await handle({
@@ -242,8 +248,14 @@ describe('EncryptedMessages Process', async () => {
 
     const response = result.Messages[0].Data as string
     const unescapedResponse = response.replace(/\\"/g, '"')
-    const noncesB64 = [nonceB64, nonceTwoB64, nonceThreeB64].sort()
-    expect(unescapedResponse).to.equal(JSON.stringify(noncesB64))
+    const parsedResponse = JSON.parse(unescapedResponse)
+    const noncesB64 = {
+      [nonceB64]: encryptedMessageId,
+      [nonceTwoB64]: encryptedMessageIdTwo,
+      [nonceThreeB64]: encryptedMessageIdThree
+    }
+
+    expect(parsedResponse).to.deep.equal(noncesB64)
   })
 
   it('Should allow Owner to remove messages by IDs (nonce)', async () => {
@@ -309,8 +321,12 @@ describe('EncryptedMessages Process', async () => {
 
     const response = listResult.Messages[0].Data as string
     const unescapedResponse = response.replace(/\\"/g, '"')
-    const nonces = [nonceOne, nonceFour].sort()
-    expect(unescapedResponse).to.equal(JSON.stringify(nonces))
+    const parsedResponse = JSON.parse(unescapedResponse)
+    const nonces = {
+      [nonceOne]: ''.padEnd(43, 'f'),
+      [nonceFour]: ''.padEnd(43, 'f')
+    }
+    expect(parsedResponse).to.deep.equal(nonces)
   })
 
   it('Should prevent non-Owners from removing messages', async () => {
