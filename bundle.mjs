@@ -10,19 +10,18 @@ const bundle = async () => {
     platform: 'browser',
     target: ['esnext'],
     format: 'esm',
-    globalName: 'ar.io',
+    globalName: 'memeticblock.aoencrytpedmessages',
     plugins: [
       polyfillNode({
         polyfills: {
           crypto: true,
-          process: true,
-          fs: true,
+          // process: true,
+          // fs: true,
         },
       }),
     ],
     tsconfig: './tsconfig.web.json',
     outfile: './bundles/web.bundle.min.js',
-    // bunyan - these are not available in the browser
     external: ['dtrace-provider', 'fs', 'mv', 'os', 'source-map-support'],
   })
     .catch((e) => {

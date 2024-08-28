@@ -15,7 +15,7 @@ import {
   MessageIdRequiredError,
   WalletNotSetError
 } from '../errors'
-import { JWKInterface } from '../util/jwk-interface'
+import { WalletLike } from '../util/wallet-like'
 
 export type SpawnEncryptedMessagesOptions = {
   module?: string
@@ -51,7 +51,7 @@ export class EncryptedMessages {
   static PUBLISHED_LUA_TX_ID = 'p5zkcW3sysfkGrkN9oc_DfVNQ9PkI3hsb-8CyPeZZdg'
 
   static async spawn(
-    wallet: JWKInterface,
+    wallet: WalletLike,
     opts?: SpawnEncryptedMessagesOptions
   ): Promise<EncryptedMessages> {
     const arweave = Arweave.init({
@@ -162,7 +162,7 @@ export class EncryptedMessages {
 
   constructor(
     public readonly processId: string,
-    private wallet?: JWKInterface,
+    private wallet?: WalletLike,
     arweave?: Arweave
   ) {
     if (!arweave) {
@@ -174,7 +174,7 @@ export class EncryptedMessages {
     }
   }
 
-  setWallet(wallet: JWKInterface) {
+  setWallet(wallet: WalletLike) {
     this.wallet = wallet
   }
 
