@@ -43,12 +43,13 @@
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json && echo \"{\\\"type\\\": \\\"commonjs\\\"}\" > lib/cjs/package.json",
     "build": "npm run clean && npm run build:web && npm run build:esm",
-    "build:process": "npm run clean && tsx scripts/bundle.ts",
     "clean": "rimraf [ lib bundles ]",
-    "clean:process": "rimraf [ dist ]",
-    "install-ao-dev-cli": "curl -L https://install_ao.g8way.io | bash",
+    "process:build": "npm run clean && tsx scripts/bundle.ts",
+    "process:clean": "rimraf [ dist ]",
+    "process:publish": "npm run process:build && tsx scripts/publish-process.ts",
     "module:build": "cd src/contract && ao build",
     "module:publish": "ao publish src/contract/process.wasm -w key.json -b https://up.arweave.net --tag=\"Memory-Limit\" --value=\"1-gb\" --tag=\"Compute-Limit\" --value=\"9000000000000\"",
+    "install-ao-dev-cli": "curl -L https://install_ao.g8way.io | bash",
     "test": "mocha test/spec/**/*.ts"
   },
   "dependencies": {
