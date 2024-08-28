@@ -47,7 +47,7 @@ Handlers.add(
     )
     assert(Messages[decoded.nonce] == nil, "Message ID (nonce) already used")
 
-    Messages[decoded.nonce] = msg.Data
+    Messages[decoded.nonce] = decoded.nonce
 
     ao.send({ Target = msg.From, Data = decoded.nonce })
   end
@@ -76,13 +76,5 @@ Handlers.add(
     end
 
     ao.send({ Target = msg.From, Data = msg.Data })
-  end
-)
-
-Handlers.add(
-  "getEncryptedMessage",
-  Handlers.utils.hasMatchingTag("Action", "Get-Encrypted-Message"),
-  function(msg)
-    ao.send({ Target = msg.From, Data = Messages[msg.Tags.EncryptedMessageId] })
   end
 )

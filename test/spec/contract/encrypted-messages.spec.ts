@@ -107,7 +107,7 @@ describe('EncryptedMessages Process', async () => {
     expect(result.Messages[0].Data).to.equal(nonceB64)
   })
 
-  it('Should validated encrypted messages', async () => {
+  it('Should validate encrypted messages', async () => {
     await handle({
       From: OWNER_ADDRESS,
       Tags: [{ name: 'Action', value: 'Set-Encryption-Public-Key' }],
@@ -344,44 +344,5 @@ describe('EncryptedMessages Process', async () => {
     expect(result.Error)
       .to.be.a('string')
       .that.includes('Invalid recipientPublicKey')
-  })
-
-  it('Allows fetching an encrypted message by id (nonce)', async () => {
-    await handle({
-      From: OWNER_ADDRESS,
-      Tags: [
-        { name: 'Action', value: 'Set-Encryption-Public-Key' },
-        { name: 'EncryptionPublicKey', value: encryptionPublicKey }
-      ],
-      Data: encryptionPublicKey
-    })
-
-    const nonces = ['one', 'two', 'three', 'four']
-    for (const nonce of nonces) {
-      await handle({
-        Tags: [{ name: 'Action', value: 'Send-Encrypted-Message' }],
-        Data: JSON.stringify({
-          message: 'message',
-          nonce,
-          publicKey: 'publicKey',
-          recipientPublicKey: encryptionPublicKey
-        })
-      })
-    }
-
-    const result = await handle({
-      Tags: [
-        { name: 'Action', value: 'Get-Encrypted-Message' },
-        { name: 'EncryptedMessageId', value: nonces[2] }
-      ],
-      Data: nonces[2]
-    })
-
-    expect(result.Messages[0].Data).to.equal(JSON.stringify({
-      message: 'message',
-      nonce: 'three',
-      publicKey: 'publicKey',
-      recipientPublicKey: encryptionPublicKey
-    }))
   })
 })
