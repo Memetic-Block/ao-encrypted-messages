@@ -248,6 +248,7 @@ export class EncryptedMessages {
 
     const { publicKey, secretKey } = opts?.secretKey
       ? nacl.box.keyPair.fromSecretKey(
+        // @ts-ignore
         typeof opts?.secretKey === 'string'
           ? Buffer.from(opts?.secretKey)
           : opts?.secretKey
@@ -268,10 +269,12 @@ export class EncryptedMessages {
 
     const encryptedMessage = nacl.box(
       naclUtil.decodeUTF8(message),
+      // @ts-ignore
       nonce,
       naclUtil.decodeBase64(this.lastSeenEncryptionPublicKey),
       secretKey
     )
+    // @ts-ignore
     const nonceB64 = naclUtil.encodeBase64(nonce)
     const encryptedMessageJson = JSON.stringify({
       message: naclUtil.encodeBase64(encryptedMessage),

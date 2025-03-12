@@ -3,6 +3,8 @@ Send encrypted messages on AO.  Like an encrypted voicemail.
 
 Useful for collecting private DAPP logs from users at their discretion!
 
+Process Lua source code at `ar://p5zkcW3sysfkGrkN9oc_DfVNQ9PkI3hsb-8CyPeZZdg`
+
 ## Install
 ```bash
 npm i @memetic-block/ao-encrypted-messages
@@ -13,6 +15,7 @@ npm i @memetic-block/ao-encrypted-messages
 - Programmatic interface
 - Supports `Curve25519`
 - Uses `tweetnacl` under the hood for encryption
+- Forwards encrypted messages to `Process.Owner`
 
 ## Programmatic Usage
 
@@ -87,6 +90,114 @@ const {
   publicKey,
   recipientPublicKey
 } = await encryptedMessages.getEncryptedMessage(messageId, secretKey)
+```
+
+## AO Process Interface
+
+### `Set-Encryption-Public-Key`
+
+**Request**
+```json
+[
+  {
+    "name": "Action",
+    "value": "Set-Encryption-Public-Key"
+  },
+  {
+    "name": "EncryptionPublicKey",
+    "value": "your Curve25519 PUBLIC key"
+  }
+]
+```
+**Success Result**
+```json
+{
+  "Data": "your Curve25519 PUBLIC key"
+}
+```
+
+### `Get-Encryption-Public-Key`
+
+**Request**
+```json
+[
+  {
+    "name": "Action",
+    "value": "Get-Encryption-Public-Key"
+  }
+]
+```
+
+**Success Result**
+```json
+{
+  "Data": "your Curve25519 PUBLIC key"
+}
+```
+
+### `Send-Encrypted-Message`
+
+**Request**
+
+Tags
+```json
+[
+  {
+    "name": "Action",
+    "value": "Send-Encrypted-Message"
+  }
+]
+```
+
+Data
+```json
+{
+  "message": "the encrypted message",
+  "publicKey": "the public key of the keypair used to encrypt the message",
+  "recipientPublicKey": "the current public key of the message recipient",
+  "nonce": "nonce used for unique message id"
+}
+```
+
+**Success Result**
+
+Reply to Sender
+```json
+{
+  "Data": "nonce for this message"
+}
+```
+
+Forward to `Process.Owner`
+```json
+{
+  "Data": {
+    "nonce": "nonce for this message",
+    "messageId": "ao messageId of the message",
+    "from": "sender address"
+  }
+}
+```
+
+### `List-Encrypted-Messages`
+
+**Request**
+
+```json
+[
+  {
+    "name": "Action",
+    "value": "List-Encrypted-Messages"
+  }
+]
+```
+
+**Success Result**
+
+```json
+{
+  "Data": { "<nonce>": "<messageId>", ... }
+}
 ```
 
 ## Contributing
