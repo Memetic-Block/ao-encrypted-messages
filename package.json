@@ -1,6 +1,6 @@
 {
   "name": "@memetic-block/ao-encrypted-messages",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/memetic-block/ao-encrypted-messages.git"
@@ -15,12 +15,15 @@
     "arweave",
     "ar",
     "blockchain",
-    "warp",
     "contracts",
     "ao",
+    "aos",
+    "permaweb",
     "messaging",
     "messages",
-    "encryption"
+    "encryption",
+    "encrypted",
+    "inbox"
   ],
   "publishConfig": {
     "access": "public"
@@ -53,7 +56,7 @@
     "test": "mocha test/spec/**/*.ts"
   },
   "dependencies": {
-    "@permaweb/aoconnect": "^0.0.56",
+    "@permaweb/aoconnect": "0.0.59",
     "commander": "^12.1.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
